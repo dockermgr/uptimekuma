@@ -103,14 +103,13 @@ SERVER_PORT_OTHER_INT="${SERVER_PORT_OTHER_INT:-}"
 SERVER_WEB_PORT="${SERVER_WEB_PORT:-$SERVER_PORT}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # SSL Setup
-SERVER_SSL_CA="/etc/ssl/CA/CasjaysDev/certs/ca.crt"
-SERVER_SSL_CRT="/etc/ssl/CA/CasjaysDev/certs/localhost.crt"
-SERVER_SSL_KEY="/etc/ssl/CA/CasjaysDev/private/localhost.key"
-[[ -f "$SERVER_SSL_CRT" ]] && [[ -f "$SERVER_SSL_KEY" ]] && SERVER_SSL="true"
-[[ -n "$SERVER_SSL" ]] || SERVER_SSL="${SERVER_SSL:-false}"
+SERVER_SSLDIR="${SERVER_SSLDIR:-/etc/ssl/CA/CasjaysDev}"
+SERVER_SSL_CA="${SERVER_SSL_CA:-$SERVER_SSLDIR/certs/ca.crt}"
+SERVER_SSL_CRT="${SERVER_SSL_CRT:-$SERVER_SSLDIR/certs/localhost.crt}"
+SERVER_SSL_KEY="${SERVER_SSL_KEY:-$SERVER_SSLDIR/private/localhost.key}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Override global variables
-[[ -f "$HOME/.config/myscripts/dockermgr/env" ]] && . "$HOME/.config/myscripts/dockermgr/env"
+[[ -f "$DOCKERMGR_HOME/env" ]] && . "$DOCKERMGR_HOME/env"
 [[ -f "$APPDIR/env" ]] && . "$APPDIR/env"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Show post install message
@@ -176,10 +175,9 @@ if cmd_exists docker-compose && [ -f "$INSTDIR/docker-compose.yml" ]; then
     __sudo docker-compose up -d &>/dev/null
   fi
 else
-  if docker ps -a | grep -qsw "$APPNAME"; then
-    __sudo docker stop "$APPNAME" &>/dev/null
-    __sudo docker rm -f "$APPNAME" &>/dev/null
-  fi
+  __sudo docker stop "$APPNAME" &>/dev/null
+  __sudo docker rm -f "$APPNAME" &>/dev/null
+
   __sudo docker run -d \
     --name="$APPNAME" \
     --hostname "$SERVER_HOST" \
